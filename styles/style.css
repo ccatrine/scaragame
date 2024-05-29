@@ -1,0 +1,44 @@
+@font-face {
+    font-family: "Lobster-Regular";
+    src: url("../src/fonts/Lobster-Regular.ttf") format('truetype');
+    font-style: normal;
+    font-weight: 400;
+}
+@font-face {
+    font-family: "NotoSerif-Regular";
+    src: url("../src/fonts/NotoSerif-Regular.ttf") format('truetype');
+    font-style: normal;
+    font-weight: 400;
+}
+@font-face {
+    font-family: "NotoSerif-ExtraLightItalic";
+    src: url("../src/fonts/NotoSerif-ExtraLightItalic.ttf") format('truetype');
+    font-style: italic;
+    font-weight: normal;
+}
+
+body {
+    display:flex;
+    flex-wrap: wrap;
+    align-content: center;
+    justify-content: center;
+    width: 100vw;
+    height: 100vh;
+    overflow: hidden;
+    -webkit-touch-callout: none; /* iOS Safari */
+    -webkit-user-select: none;   /* Chrome/Safari/Opera */
+    -khtml-user-select: none;    /* Konqueror */
+    -moz-user-select: none;      /* Firefox */
+    -ms-user-select: none;       /* Internet Explorer/Edge */
+    user-select: none;           /* Non-prefixed version, currently
+                                not supported by any browser */
+
+    padding: 0;
+    margin: 0;
+    background-color:black;
+    background-image: url(../src/images/bg1600x900.png);
+    background-position: center;
+    background-size:cover;
+    background-repeat: no-repeat;
+}
+canvas{display:block}
