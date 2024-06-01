@@ -19,7 +19,8 @@ const roomOffsetX = 0
 const roomOffsetY = 120
 // в переменной roomImage будем хранить масштабированное изображение комнаты (пока его нет)
 let roomImage = null
-
+//это 60 секунд
+let time = 60*1000
 // объект View содержит информацию о экране устройства
 const View={
     width: innerWidth, // ширина
@@ -110,8 +111,12 @@ function loadingDone(){
     // список предметов в комнате
     items = [
         //        image, width, height, x, y
-        new Item(IMG['key.png'], 120, 50, 1000, 740),
-        new Item(IMG['cat.png'], 233, 211, 200, 100),
+        new Item(IMG['key.png'], 90, 30, 1500, 520),
+        new Item(IMG['cat.png'], 130, 100, 1150, 350),
+        new Item(IMG['note.png'],80 ,80,600,800),
+        new Item(IMG['toy.png'], 60 ,80,650,620),
+        new Item(IMG['broom.png'],130 ,300,250,600),
+
     ]
 
     items.forEach(item=> menuItemList.push ( new MenuItem(item.img)))
@@ -208,12 +213,23 @@ class Item {
     }
 
     checkClick(x, y) {
+        let isokey=false
         if (x > this.x && x < this.x + this.width && y > this.y && y < this.y + this.height) {
             this.isExist=false
             menuItemList.forEach(item=> {
-                if (item.img.src===this.img.src) item.isExist=false
+                if (item.img.src===this.img.src) {
+                    item.isExist=false
+                    isokey=true
+                }
             })
         }
+        if(isokey){
+          SE['se_win.mp3'].play() 
+        }
+        else {
+            SE['se_error.mp3'].play() 
+        }
+    
     }
 
     draw() {
@@ -308,11 +324,13 @@ function getMouseMove(event) {
 
 ////////////////////////////////////////////////////////////////////
 
-//                               text,             x,                  y, size, align,   color
+//                               text,                              x,  y, size, align,   color
 const taskText = new TextImage('Найди предметы:', 20, 20, 50, 'left', 'rgb(199, 185, 165 )' )
-
+const timeText = new TextImage(`Время : ${(time/1000).toFixed()} секунд`, canvas.width-20, 20, 50, 'right', 'rgb(199, 185, 165 )' )
+const finalText = new TextImage('Время вышло', canvas.width*0.5, canvas.height*0.5, 150, 'center', 'rgb(139, 69, 19)' )
 // список предметов в комнате
 let items = []
+
 
   
 canvas.onclick = getClick // при клике по <canvas> вызываем функцию getClick
@@ -322,9 +340,15 @@ let mouseMoveEffectSteps = mouseMoveEffectDelay
 canvas.onmousemove = getMouseMove 
 
 ////////////////////////////////////////////////////////////////////
-
+let isTimeStart=false
 // функция обновления экрана (перерисовки графики в теге <canvas>)
-function animation(){
+function animation(timeStemp){
+    if (isTimeStart===false && timeStemp) {
+        time = timeStemp + time
+     isTimeStart=true
+  
+    }
+    let timeout = Math.ceil((time-timeStemp)/1000)
     context.clearRect(0, 0, canvas.width, canvas.height) // стираем все что было нарисовано в теге <canvas>
     context.fillStyle = 'rgba(0, 0, 0, 0.75)' // задаем цвет заливки (Red = 0, Green = 0, Blue = 0, alpha = 0.75% - прозрачность)
     context.fillRect(0, 0, canvas.width, canvas.height) // рисуем прямоугольник залитый заданным цветом (координата X, Y, ширина, высота)
@@ -334,12 +358,34 @@ function animation(){
 
     taskText.draw()
     drawMenuItems()
+    timeText.render(`Время : ${timeout} секунд`)
+    timeText.draw()
 
     items=items.filter(item=> item.isExist)
     menuItemList=menuItemList.filter(item=> item.isExist)
+    if(items.length===0) return gameEnd (true,timeout)
+
 
     context.drawImage(IMG['pers315x756.png'],canvas.width-315,canvas.height-756)
     points.forEach(point => point.update())
-    points = points.filter(point => point.isExist)
-    requestAnimationFrame(animation) // просим браузер при следующем обновлении экрана вызвать функцию animation()
+    
+    if (timeout>=0||!timeout) requestAnimationFrame(animation) // просим браузер при следующем обновлении экрана вызвать функцию animation()
+    else gameEnd (false,timeout)
+}
+
+
+function gameEnd(iswin,timeout){
+    context.clearRect(0, 0, canvas.width, canvas.height) // стираем все что было нарисовано в теге <canvas>
+    context.fillStyle = 'rgba(0, 0, 0, 0.75)' // задаем цвет заливки (Red = 0, Green = 0, Blue = 0, alpha = 0.75% - прозрачность)
+    context.fillRect(0, 0, canvas.width, canvas.height) // рисуем прямоугольник залитый заданным цветом (координата X, Y, ширина, высота)
+    context.drawImage(roomImage, roomOffsetX, roomOffsetY) // рисуем картинку roomImage в координатах X и Y
+
+    taskText.draw()
+    drawMenuItems()
+    timeText.render(`Время : ${timeout} секунд`)
+    timeText.draw()
+
+    context.drawImage(IMG['pers315x756.png'],canvas.width-315,canvas.height-756)
+    if (iswin) finalText.render ('Предметы найдены')
+    finalText.draw()
 }
